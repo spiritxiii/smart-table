@@ -37,6 +37,8 @@ const {applyPagination, updatePagination} = initPagination(sampleTable.paginatio
 
 const {applyFiltering, updateIndexes} = initFiltering(sampleTable.filter.elements);
 
+const applySearching = initSearching('search');
+
 /**
  * Сбор и обработка полей из таблицы
  * @returns {Object}
@@ -71,7 +73,8 @@ async function render(action) {
   
   query = applyPagination(query, state, action);
   query = applyFiltering(query, state, action);
-  
+  query = applySearching(query, state, action);
+
   const { total, items } = await api.getRecords(query);
 
   // sampleTable.render(result);
@@ -85,13 +88,6 @@ async function render(action) {
 //   sampleTable.header.elements.sortByTotal,
 // ]);
 
-// const applyFiltering = initFiltering(sampleTable.filter.elements, {
-//   // передаём элементы фильтра
-//   searchBySeller: indexes.sellers, // для элемента с именем searchBySeller устанавливаем массив продавцов
-// });
-
-// const applySearching = initSearching('search');
-
 const appRoot = document.querySelector('#app');
 appRoot.appendChild(sampleTable.container);
 
@@ -103,5 +99,4 @@ async function init() {
     });
 } 
 
-// render();
 init().then(render);
