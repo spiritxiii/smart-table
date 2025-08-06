@@ -1,8 +1,6 @@
 import './fonts/ys-display/fonts.css';
 import './style.css';
 
-import { data as sourceData } from './data/dataset_1.js';
-
 import { initData } from './data.js';
 import { processFormData } from './lib/utils.js';
 
@@ -14,7 +12,8 @@ import { initSearching } from './components/searching.js';
 
 // Исходные данные используемые в render()
 // const { data, ...indexes } = initData(sourceData);
-const api = initData(sourceData);
+const api = initData();
+
 const sampleTable = initTable(
   {
     tableTemplate: 'table',
@@ -24,6 +23,7 @@ const sampleTable = initTable(
   },
   render
 );
+
 const {applyPagination, updatePagination} = initPagination(sampleTable.pagination.elements, // передаём сюда элементы пагинации, найденные в шаблоне
   (el, page, isCurrent) => {
     // и колбэк, чтобы заполнять кнопки страниц данными
@@ -34,6 +34,8 @@ const {applyPagination, updatePagination} = initPagination(sampleTable.paginatio
     label.textContent = page;
     return el;
   });
+
+const {applyFiltering, updateIndexes} = initFiltering(sampleTable.filter.elements);
 
 /**
  * Сбор и обработка полей из таблицы
@@ -67,27 +69,15 @@ async function render(action) {
   // result = applySorting(result, state, action);
   // result = applyPagination(result, state, action);
   
-  query = applyPagination(query, state, action); // обновляем query
-
+  query = applyPagination(query, state, action);
+  query = applyFiltering(query, state, action);
+  
   const { total, items } = await api.getRecords(query);
 
   // sampleTable.render(result);
   updatePagination(total, query); // перерисовываем пагинатор
   sampleTable.render(items);
 }
-
-// const applyPagination = initPagination(
-//   sampleTable.pagination.elements, // передаём сюда элементы пагинации, найденные в шаблоне
-//   (el, page, isCurrent) => {
-//     // и колбэк, чтобы заполнять кнопки страниц данными
-//     const input = el.querySelector('input');
-//     const label = el.querySelector('span');
-//     input.value = page;
-//     input.checked = isCurrent;
-//     label.textContent = page;
-//     return el;
-//   }
-// );
 
 // const applySorting = initSorting([
 //   // Нам нужно передать сюда массив элементов, которые вызывают сортировку, чтобы изменять их визуальное представление
@@ -106,8 +96,12 @@ const appRoot = document.querySelector('#app');
 appRoot.appendChild(sampleTable.container);
 
 async function init() {
-  const indexes = await api.getIndexes();
-}
+    const indexes = await api.getIndexes();
+
+    updateIndexes(sampleTable.filter.elements, {
+        searchBySeller: indexes.sellers
+    });
+} 
 
 // render();
 init().then(render);

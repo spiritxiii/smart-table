@@ -36,7 +36,7 @@ export const initPagination = (
   }
 
   const updatePagination = (total, { page, limit }) => {
-      const pageCount = Math.ceil(total / limit);
+      pageCount = Math.ceil(total / limit);
 
       const visiblePages = getPages(page, pageCount, 5); // Получим массив страниц, которые нужно показать, выводим только 5 страниц
       pages.replaceChildren(

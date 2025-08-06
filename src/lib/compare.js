@@ -63,12 +63,10 @@ const rules = {
     if (Array.isArray(targetValue)) {
       if (targetValue.length === 2) {
         const [from, to] = targetValue;
-        if (!isEmpty(from) && sourceValue < +from) {
-          // добавляем унарный плюс для корректного сравнения
+        if (!isEmpty(from) && sourceValue < from) {
           return { result: false };
         }
-        if (!isEmpty(to) && sourceValue > +to) {
-          // добавляем унарный плюс для корректного сравнения
+        if (!isEmpty(to) && sourceValue > to) {
           return { result: false };
         }
 
