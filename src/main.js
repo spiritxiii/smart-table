@@ -15,6 +15,25 @@ import { initSearching } from './components/searching.js';
 // Исходные данные используемые в render()
 // const { data, ...indexes } = initData(sourceData);
 const api = initData(sourceData);
+const sampleTable = initTable(
+  {
+    tableTemplate: 'table',
+    rowTemplate: 'row',
+    before: ['search', 'header', 'filter'],
+    after: ['pagination'],
+  },
+  render
+);
+const {applyPagination, updatePagination} = initPagination(sampleTable.pagination.elements, // передаём сюда элементы пагинации, найденные в шаблоне
+  (el, page, isCurrent) => {
+    // и колбэк, чтобы заполнять кнопки страниц данными
+    const input = el.querySelector('input');
+    const label = el.querySelector('span');
+    input.value = page;
+    input.checked = isCurrent;
+    label.textContent = page;
+    return el;
+  });
 
 /**
  * Сбор и обработка полей из таблицы
@@ -47,48 +66,41 @@ async function render(action) {
   // result = applyFiltering(result, state, action);
   // result = applySorting(result, state, action);
   // result = applyPagination(result, state, action);
+  
+  query = applyPagination(query, state, action); // обновляем query
 
   const { total, items } = await api.getRecords(query);
 
   // sampleTable.render(result);
+  updatePagination(total, query); // перерисовываем пагинатор
   sampleTable.render(items);
 }
 
-const sampleTable = initTable(
-  {
-    tableTemplate: 'table',
-    rowTemplate: 'row',
-    before: ['search', 'header', 'filter'],
-    after: ['pagination'],
-  },
-  render
-);
+// const applyPagination = initPagination(
+//   sampleTable.pagination.elements, // передаём сюда элементы пагинации, найденные в шаблоне
+//   (el, page, isCurrent) => {
+//     // и колбэк, чтобы заполнять кнопки страниц данными
+//     const input = el.querySelector('input');
+//     const label = el.querySelector('span');
+//     input.value = page;
+//     input.checked = isCurrent;
+//     label.textContent = page;
+//     return el;
+//   }
+// );
 
-const applyPagination = initPagination(
-  sampleTable.pagination.elements, // передаём сюда элементы пагинации, найденные в шаблоне
-  (el, page, isCurrent) => {
-    // и колбэк, чтобы заполнять кнопки страниц данными
-    const input = el.querySelector('input');
-    const label = el.querySelector('span');
-    input.value = page;
-    input.checked = isCurrent;
-    label.textContent = page;
-    return el;
-  }
-);
-
-const applySorting = initSorting([
-  // Нам нужно передать сюда массив элементов, которые вызывают сортировку, чтобы изменять их визуальное представление
-  sampleTable.header.elements.sortByDate,
-  sampleTable.header.elements.sortByTotal,
-]);
+// const applySorting = initSorting([
+//   // Нам нужно передать сюда массив элементов, которые вызывают сортировку, чтобы изменять их визуальное представление
+//   sampleTable.header.elements.sortByDate,
+//   sampleTable.header.elements.sortByTotal,
+// ]);
 
 // const applyFiltering = initFiltering(sampleTable.filter.elements, {
 //   // передаём элементы фильтра
 //   searchBySeller: indexes.sellers, // для элемента с именем searchBySeller устанавливаем массив продавцов
 // });
 
-const applySearching = initSearching('search');
+// const applySearching = initSearching('search');
 
 const appRoot = document.querySelector('#app');
 appRoot.appendChild(sampleTable.container);
